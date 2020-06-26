@@ -1,4 +1,4 @@
-package com.nth.springeurekazuul.security;
+package com.nth.springeurekacommon.security;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
