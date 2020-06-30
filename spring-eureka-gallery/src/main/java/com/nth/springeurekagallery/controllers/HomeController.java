@@ -1,6 +1,7 @@
 package com.nth.springeurekagallery.controllers;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.nth.springeurekagallery.entities.Gallery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 @RestController
@@ -31,7 +33,8 @@ public class HomeController {
         return "Hello from Gallery Service running at port: " + env.getProperty("local.server.port");
     }
 
-    @HystrixCommand(fallbackMethod = "fallback")
+    @HystrixCommand(fallbackMethod = "fallback",
+        commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000")})
     @RequestMapping("/{id}")
     public Gallery getGallery(@PathVariable final int id) {
         LOGGER.info("Creating gallery object ... ");
@@ -54,6 +57,7 @@ public class HomeController {
     // We'll add the logic of role based auth later
     @RequestMapping("/admin")
     public String homeAdmin() {
+        LOGGER.info("gallery object admin... ");
         return "This is the admin area of Gallery service running at port: " + env.getProperty("local.server.port");
     }
 }
