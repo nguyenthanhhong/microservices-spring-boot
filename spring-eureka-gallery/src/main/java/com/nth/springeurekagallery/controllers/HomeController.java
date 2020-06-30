@@ -1,6 +1,9 @@
 package com.nth.springeurekagallery.controllers;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.nth.springeurekagallery.entities.Gallery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/")
 public class HomeController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeController.class);
     @Autowired
     private RestTemplate restTemplate;
 
@@ -27,8 +31,10 @@ public class HomeController {
         return "Hello from Gallery Service running at port: " + env.getProperty("local.server.port");
     }
 
+    @HystrixCommand(fallbackMethod = "fallback")
     @RequestMapping("/{id}")
     public Gallery getGallery(@PathVariable final int id) {
+        LOGGER.info("Creating gallery object ... ");
         // create gallery object
         Gallery gallery = new Gallery();
         gallery.setId(id);
@@ -38,6 +44,9 @@ public class HomeController {
         gallery.setImages(images);
 
         return gallery;
+    }
+    public Gallery fallback(int galleryId, Throwable hystrixCommand) {
+        return new Gallery(galleryId);
     }
 
     // -------- Admin Area --------
